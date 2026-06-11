@@ -3,7 +3,7 @@ import { AuthService }        from './auth.service';
 import { getModelToken }      from '@nestjs/mongoose';
 import { JwtService }         from '@nestjs/jwt';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
-import { User }               from '../incidents/schemas/user.schema';
+import { User }               from './schemas/user.schema';
 import * as bcrypt            from 'bcryptjs';
 
 const mockUserModel = {
@@ -32,6 +32,8 @@ describe('AuthService', () => {
 
   afterEach(() => jest.clearAllMocks());
 
+  // ── register() ─────────────────────────────────────────────────────────────
+  // register() calls findOne() without .select() — use mockResolvedValue directly
   describe('register()', () => {
     it('should throw ConflictException if email already exists', async () => {
       mockUserModel.findOne.mockResolvedValue({ email: 'jane@example.com' });
@@ -54,9 +56,13 @@ describe('AuthService', () => {
     });
   });
 
+  // ── login() ────────────────────────────────────────────────────────────────
+  // login() calls findOne().select('+password') — mock must return a chainable object
   describe('login()', () => {
     it('should throw UnauthorizedException if user not found', async () => {
-      mockUserModel.findOne.mockResolvedValue(null);
+      mockUserModel.findOne.mockReturnValue({
+        select: jest.fn().mockResolvedValue(null),
+      });
 
       await expect(
         service.login({ email: 'ghost@example.com', password: 'pass' }),
@@ -64,7 +70,9 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if password is wrong', async () => {
-      mockUserModel.findOne.mockResolvedValue({ email: 'jane@example.com', password: 'hashed' });
+      mockUserModel.findOne.mockReturnValue({
+        select: jest.fn().mockResolvedValue({ email: 'jane@example.com', password: 'hashed' }),
+      });
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
       await expect(
@@ -73,7 +81,11 @@ describe('AuthService', () => {
     });
 
     it('should return a signed JWT on valid credentials', async () => {
-      mockUserModel.findOne.mockResolvedValue({ _id: 'abc123', email: 'jane@example.com', password: 'hashed' });
+      mockUserModel.findOne.mockReturnValue({
+        select: jest.fn().mockResolvedValue({
+          _id: 'abc123', email: 'jane@example.com', password: 'hashed',
+        }),
+      });
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 
       const result = await service.login({ email: 'jane@example.com', password: 'pass1234' });

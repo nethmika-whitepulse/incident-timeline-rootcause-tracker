@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -10,17 +12,28 @@ async function bootstrap() {
   // ── Logging (Winston via nest-winston) ──────────────────────────────────────
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
+  // ── Global Exception Filter ─────────────────────────────────────────────────
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  // ── Global Logging Interceptor ──────────────────────────────────────────────
+  app.useGlobalInterceptors(new LoggingInterceptor());
+
   // ── Global Validation Pipe ──────────────────────────────────────────────────
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,        // Strip properties not in DTO
+      whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true,        // Auto-transform payloads to DTO instances
+      transform: true,
     }),
   );
 
   // ── CORS ────────────────────────────────────────────────────────────────────
-  app.enableCors();
+  // Locked to the frontend origin via env — defaults to localhost:5173 (Vite).
+  // Set CORS_ORIGIN in .env for staging/production deployments.
+  app.enableCors({
+    origin:      process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+    credentials: true,
+  });
 
   // ── Global API prefix ───────────────────────────────────────────────────────
   app.setGlobalPrefix('api');

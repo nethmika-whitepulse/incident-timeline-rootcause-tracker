@@ -4,7 +4,7 @@ import { JwtService }  from '@nestjs/jwt';
 import { Model }       from 'mongoose';
 import * as bcrypt     from 'bcryptjs';
 
-import { User, UserDocument } from '../incidents/schemas/user.schema';
+import { User, UserDocument } from './schemas/user.schema';
 import { RegisterDto }        from './dto/register.dto';
 import { LoginDto }           from './dto/login.dto';
 
@@ -20,13 +20,17 @@ export class AuthService {
     if (exists) throw new ConflictException('Email already registered');
 
     const hashed = await bcrypt.hash(dto.password, 10);
-    const user = await this.userModel.create({ ...dto, password: hashed });
+    const user   = await this.userModel.create({ ...dto, password: hashed });
 
     return { message: 'User registered successfully', userId: user._id };
   }
 
   async login(dto: LoginDto) {
-    const user = await this.userModel.findOne({ email: dto.email });
+    // password has select:false on the schema — must explicitly include it here
+    const user = await this.userModel
+      .findOne({ email: dto.email })
+      .select('+password');
+
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const valid = await bcrypt.compare(dto.password, user.password);
