@@ -1,0 +1,14 @@
+{
+  "name": "incident-tracker",
+  "version": "1.0.0",
+  "description": "Incident Timeline & Root Cause Tracker — monorepo root",
+  "private": true,
+  "scripts": {
+    "dev:backend":   "cd backend && npm run start:dev",
+    "dev:frontend":  "cd frontend && npm run dev",
+    "test:backend":  "cd backend && npm test",
+    "test:frontend": "cd frontend && npm test",
+    "install:all":   "cd backend && npm install && cd ../frontend && npm install",
+    "build:backend": "cd backend && npm run build"
+  }
+}
