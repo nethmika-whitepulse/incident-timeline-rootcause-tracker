@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Incident, IncidentDocument, IncidentStatus } from '../incidents/schemas/incident.schema';
-import { ActionItem, ActionItemDocument }              from '../action-items/schemas/action-item.schema';
 
 @Injectable()
 export class DashboardService {
   constructor(
-    @InjectModel(Incident.name)   private incidentModel:   Model<IncidentDocument>,
-    @InjectModel(ActionItem.name) private actionItemModel: Model<ActionItemDocument>,
+    @InjectModel(Incident.name) private incidentModel: Model<IncidentDocument>,
   ) {}
 
   async getSummary() {
