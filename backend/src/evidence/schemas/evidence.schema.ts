@@ -7,22 +7,24 @@ export enum EvidenceType { Screenshot = 'screenshot', Log = 'log', Note = 'note'
 
 @Schema({ timestamps: true })
 export class Evidence {
-  @Prop({ required: true, type: Types.ObjectId, ref: 'Incident' })
+  @Prop({ required: true, type: Types.ObjectId, ref: 'Incident', index: true })
   incidentId: Types.ObjectId;
 
   @Prop({ required: true, enum: EvidenceType })
   type: EvidenceType;
 
-  @Prop()
-  filename: string;   // for file uploads
+  // maxlength: 255 matches the common filesystem filename length limit
+  @Prop({ trim: true, maxlength: 255 })
+  filename: string;
 
-  @Prop()
-  filePath: string;   // stored path / URL
+  // maxlength: 2048 aligns with the de-facto URL length limit
+  @Prop({ trim: true, maxlength: 2048 })
+  filePath: string;
 
-  @Prop()
-  notes: string;      // investigation notes / log snippets
+  @Prop({ trim: true, maxlength: 5000 })
+  notes: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, trim: true, minlength: 2 })
   uploadedBy: string;
 }
 

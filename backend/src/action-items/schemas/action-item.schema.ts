@@ -10,10 +10,10 @@ export class ActionItem {
   @Prop({ required: true, type: Types.ObjectId, ref: 'Incident' })
   incidentId: Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop({ required: true, trim: true, minlength: 3, maxlength: 200 })
   title: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, trim: true, minlength: 2, maxlength: 100 })
   owner: string;
 
   @Prop({ required: true })
@@ -24,3 +24,7 @@ export class ActionItem {
 }
 
 export const ActionItemSchema = SchemaFactory.createForClass(ActionItem);
+
+// Compound indexes
+ActionItemSchema.index({ incidentId: 1, status: 1 }); // fetch open/done items per incident
+ActionItemSchema.index({ dueDate: 1 });                // sort/filter overdue items

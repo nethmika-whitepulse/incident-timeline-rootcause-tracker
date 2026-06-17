@@ -3,7 +3,6 @@ import { getModelToken }        from '@nestjs/mongoose';
 import { DashboardService }     from './dashboard.service';
 import { Incident, IncidentStatus } from '../incidents/schemas/incident.schema';
 
-// ── Mock Mongoose model ───────────────────────────────────────────────────────
 const mockIncidentModel = {
   countDocuments: jest.fn(),
   aggregate:      jest.fn(),
@@ -12,6 +11,8 @@ const mockIncidentModel = {
 
 describe('DashboardService', () => {
   let service: DashboardService;
+  // Hoisted so individual tests can override select without rebuilding the chain
+  let chain: { sort: jest.Mock; limit: jest.Mock; select: jest.Mock };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,14 +24,14 @@ describe('DashboardService', () => {
 
     service = module.get<DashboardService>(DashboardService);
 
-    // Build a fresh chain mock per test so sort/limit/select never bleed
-    // between tests — each jest.fn() call creates a new independent mock
-    const freshChain = {
+    // Fresh chain per test — all three mocks are new jest.fn() instances
+    // so recorded calls and implementations never bleed between tests
+    chain = {
       sort:   jest.fn().mockReturnThis(),
       limit:  jest.fn().mockReturnThis(),
       select: jest.fn().mockResolvedValue([]),
     };
-    mockIncidentModel.find.mockReturnValue(freshChain);
+    mockIncidentModel.find.mockReturnValue(chain);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -52,9 +53,13 @@ describe('DashboardService', () => {
     it('should return incidents grouped by severity using the correct pipeline', async () => {
       const severityBreakdown = [{ _id: 'P1', count: 2 }, { _id: 'P2', count: 5 }];
       mockIncidentModel.countDocuments.mockResolvedValue(0);
+
+      // Both aggregate calls live in the same Promise.all array so they are
+      // invoked synchronously in array order — Once(1) is bySeverity,
+      // Once(2) is meanResolution. This ordering is deterministic.
       mockIncidentModel.aggregate
-        .mockResolvedValueOnce(severityBreakdown)  // 1st call — bySeverity
-        .mockResolvedValueOnce([]);                 // 2nd call — meanResolution
+        .mockResolvedValueOnce(severityBreakdown)
+        .mockResolvedValueOnce([]);
 
       const result = await service.getSummary();
 
@@ -71,9 +76,8 @@ describe('DashboardService', () => {
       mockIncidentModel.countDocuments.mockResolvedValue(0);
       mockIncidentModel.aggregate.mockResolvedValue([]);
 
-      // Override the fresh chain's terminal method for this test
-      const chain = { sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), select: jest.fn().mockResolvedValue(closedIncidents) };
-      mockIncidentModel.find.mockReturnValue(chain);
+      // Override only select on the beforeEach chain — no need to rebuild it
+      chain.select.mockResolvedValue(closedIncidents);
 
       const result = await service.getSummary();
 
@@ -108,8 +112,7 @@ describe('DashboardService', () => {
     });
 
     // ── meanResolutionMinutes — no resolved incidents ─────────────────────────
-    it('should return null for meanResolutionMinutes when aggregation returns empty array', async () => {
-      // No incidents have both startTime and endTime — $match filters everything out
+    it('should return null when no incidents have startTime and endTime', async () => {
       mockIncidentModel.countDocuments.mockResolvedValue(0);
       mockIncidentModel.aggregate.mockResolvedValue([]);
 
@@ -119,14 +122,13 @@ describe('DashboardService', () => {
     });
 
     // ── meanResolutionMinutes — field missing from result document ─────────────
-    // If the aggregation returns a document but meanResolutionMinutes is absent
-    // (e.g. all durations were null), the ?. operator returns undefined and
-    // the ?? null coalesces it to null rather than leaking undefined to the client.
+    // The ?. operator returns undefined when the field is absent from the doc;
+    // ?? null coalesces to null so undefined never reaches the client.
     it('should return null when aggregation result document is missing the meanResolutionMinutes field', async () => {
       mockIncidentModel.countDocuments.mockResolvedValue(0);
       mockIncidentModel.aggregate
-        .mockResolvedValueOnce([])   // bySeverity
-        .mockResolvedValueOnce([{}]); // meanResolution returns doc with no field
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{}]);
 
       const result = await service.getSummary();
 

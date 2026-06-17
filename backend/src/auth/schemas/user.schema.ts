@@ -5,13 +5,22 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true })
+  @Prop({ required: true, trim: true, minlength: 2, maxlength: 100 })
   name: string;
 
-  @Prop({ required: true, unique: true, lowercase: true })
+  // match validates the email format at the Mongoose layer — catches values
+  // like "notanemail" that pass class-validator's @IsEmail but could slip
+  // through if the model is ever used outside the validated controller path.
+  @Prop({
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: [/^\S+@\S+\.\S+$/, 'Value must be a valid email address'],
+  })
   email: string;
 
-  // select: false means the password hash is NEVER returned by default queries.
+  // select: false — hash never returned by default queries.
   // Login must explicitly opt-in with .select('+password').
   @Prop({ required: true, select: false })
   password: string;
