@@ -20,14 +20,13 @@ export class Incident {
   description: string;
 
   // index: true removed — the compound { status, severity } below covers
-  // single-field severity queries via its right-side prefix and the
-  // standalone index would just add write overhead with no query benefit.
+  // status+severity and status-only queries via the left-prefix rule.
+  // severity-only queries are not a listed access pattern so no standalone index is needed.
   @Prop({ required: true, enum: Severity })
   severity: Severity;
 
-  // index: true removed — the compound { status, severity } covers
-  // status-only queries via the left-prefix rule (MongoDB can use the
-  // leftmost field of a compound index for single-field queries).
+  // index: true removed — the compound { status, severity } below covers
+  // status+severity and status-only queries via the left-prefix rule.
   @Prop({ required: true, enum: IncidentStatus, default: IncidentStatus.Open })
   status: IncidentStatus;
 
@@ -43,9 +42,9 @@ export class Incident {
 
 export const IncidentSchema = SchemaFactory.createForClass(Incident);
 
-// Compound index — left-prefix rule means this single index covers:
-//   • status-only queries  (?status=Open)
-//   • severity-only queries (?severity=P1) via right-side field
-//   • combined queries     (?status=Open&severity=P1)
+// Compound index — the left-prefix rule means this covers:
+//   • status-only queries     (?status=Open)
+//   • status+severity queries (?status=Open&severity=P1)
+// severity-only queries are NOT covered — add a separate index if that becomes a requirement.
 IncidentSchema.index({ status: 1, severity: 1 });
 IncidentSchema.index({ createdAt: -1 }); // default newest-first sort

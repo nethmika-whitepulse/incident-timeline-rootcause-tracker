@@ -12,13 +12,14 @@ export class Rca {
   @Prop({ required: true, trim: true, minlength: 10, maxlength: 2000 })
   rootCause: string;
 
-  // Custom validator guards against empty strings and whitespace-only entries
-  // which @Prop([String]) would otherwise accept without complaint.
+  // null guard (s != null) runs first — Mongoose can cast mixed input before
+  // validation fires, so a null/undefined item would throw TypeError on .trim()
+  // without it. The guard short-circuits and returns a clean validation error instead.
   @Prop({
     type: [String],
     validate: {
       validator: (arr: string[]) =>
-        arr.every(s => s.trim().length > 0 && s.length <= 500),
+        arr.every(s => s != null && s.trim().length > 0 && s.length <= 500),
       message: 'Each contributing factor must be non-empty and under 500 characters',
     },
   })
