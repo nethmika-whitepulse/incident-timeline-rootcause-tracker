@@ -7,22 +7,22 @@ export enum EvidenceType { Screenshot = 'screenshot', Log = 'log', Note = 'note'
 
 @Schema({ timestamps: true })
 export class Evidence {
-  @Prop({ required: true, type: Types.ObjectId, ref: 'Incident' })
+  @Prop({ required: true, type: Types.ObjectId, ref: 'Incident', index: true })
   incidentId: Types.ObjectId;
 
   @Prop({ required: true, enum: EvidenceType })
   type: EvidenceType;
 
-  @Prop()
-  filename: string;   // for file uploads
+  @Prop({ trim: true })
+  filename: string;
 
-  @Prop()
-  filePath: string;   // stored path / URL
+  @Prop({ trim: true })
+  filePath: string;
 
-  @Prop()
-  notes: string;      // investigation notes / log snippets
+  @Prop({ trim: true, maxlength: 5000 })
+  notes: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, trim: true })
   uploadedBy: string;
 }
 

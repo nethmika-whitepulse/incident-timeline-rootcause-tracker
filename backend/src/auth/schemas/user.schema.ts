@@ -5,13 +5,13 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true })
+  @Prop({ required: true, trim: true, minlength: 2, maxlength: 100 })
   name: string;
 
-  @Prop({ required: true, unique: true, lowercase: true })
+  @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email: string;
 
-  // select: false means the password hash is NEVER returned by default queries.
+  // select: false — hash never returned by default queries.
   // Login must explicitly opt-in with .select('+password').
   @Prop({ required: true, select: false })
   password: string;
