@@ -12,7 +12,16 @@ export class Rca {
   @Prop({ required: true, trim: true, minlength: 10, maxlength: 2000 })
   rootCause: string;
 
-  @Prop([String])
+  // Custom validator guards against empty strings and whitespace-only entries
+  // which @Prop([String]) would otherwise accept without complaint.
+  @Prop({
+    type: [String],
+    validate: {
+      validator: (arr: string[]) =>
+        arr.every(s => s.trim().length > 0 && s.length <= 500),
+      message: 'Each contributing factor must be non-empty and under 500 characters',
+    },
+  })
   contributingFactors: string[];
 
   @Prop({ required: true, trim: true, minlength: 10, maxlength: 2000 })

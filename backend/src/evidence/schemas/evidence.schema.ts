@@ -13,10 +13,12 @@ export class Evidence {
   @Prop({ required: true, enum: EvidenceType })
   type: EvidenceType;
 
-  @Prop({ trim: true })
+  // maxlength: 255 matches the common filesystem filename length limit
+  @Prop({ trim: true, maxlength: 255 })
   filename: string;
 
-  @Prop({ trim: true })
+  // maxlength: 2048 aligns with the de-facto URL length limit
+  @Prop({ trim: true, maxlength: 2048 })
   filePath: string;
 
   @Prop({ trim: true, maxlength: 5000 })
