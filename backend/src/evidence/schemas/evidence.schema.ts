@@ -24,7 +24,7 @@ export class Evidence {
   @Prop({ trim: true, maxlength: 5000 })
   notes: string;
 
-  @Prop({ required: true, trim: true })
+  @Prop({ required: true, trim: true, minlength: 2 })
   uploadedBy: string;
 }
 
