@@ -4,7 +4,7 @@ import api from '../api/axios';
 const AuthContext = createContext(null);
 
 // ── Manual JWT decode ─────────────────────────────────────────────────────────
-// The server JWT payload is { sub: userId, email, iat, exp }.
+// The server JWT payload is { sub: userId, email, name, iat, exp }.
 // We only need to read the payload — signature verification happens server-side.
 // No library needed: split on '.', base64-decode the middle segment, parse JSON.
 const decodeToken = (token) => {
@@ -57,7 +57,7 @@ export function AuthProvider({ children }) {
 
       const decoded = token ? decodeToken(token) : null;
       if (decoded && !isTokenExpired(decoded)) {
-        setUser({ userId: decoded.sub, email: decoded.email });
+        setUser({ userId: decoded.sub, email: decoded.email, name: decoded.name });
         setLoading(false);
       } else if (!refreshToken) {
         // No usable access token and nothing to refresh with — give up.
@@ -107,7 +107,7 @@ export function AuthProvider({ children }) {
     }
     localStorage.setItem('token', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
-    setUser({ userId: decoded.sub, email: decoded.email });
+    setUser({ userId: decoded.sub, email: decoded.email, name: decoded.name });
   };
 
   // Revokes the refresh token server-side (so it can't be used again even

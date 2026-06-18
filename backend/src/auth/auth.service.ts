@@ -9,7 +9,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import { RegisterDto }        from './dto/register.dto';
 import { LoginDto }           from './dto/login.dto';
 
-type TokenPayload = { sub: string; email: string };
+type TokenPayload = { sub: string; email: string; name: string };
 
 @Injectable()
 export class AuthService {
@@ -40,7 +40,7 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    const payload: TokenPayload = { sub: String(user._id), email: user.email };
+    const payload: TokenPayload = { sub: String(user._id), email: user.email, name: user.name };
     return this.issueTokenPair(payload);
   }
 
@@ -73,7 +73,7 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token has been revoked');
     }
 
-    return this.issueTokenPair({ sub: String(user._id), email: user.email });
+    return this.issueTokenPair({ sub: String(user._id), email: user.email, name: user.name });
   }
 
   // Revokes the stored refresh token so it can no longer be exchanged for a
