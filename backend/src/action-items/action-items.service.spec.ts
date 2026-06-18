@@ -37,7 +37,7 @@ describe('ActionItemsService', () => {
       const dto = {
         incidentId: INCIDENT_ID,
         title:      'Add circuit breaker to DB connection',
-        owner:      'Jane',
+        owner:      'Nethmika',
         dueDate:    '2024-07-01',
       };
       mockModel.create.mockResolvedValue({ _id: VALID_ID, ...dto, status: ActionItemStatus.Open });

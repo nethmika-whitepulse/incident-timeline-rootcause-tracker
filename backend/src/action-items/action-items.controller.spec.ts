@@ -24,7 +24,7 @@ describe('ActionItemsController', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('create() should call service.create', async () => {
-    const dto = { incidentId: 'inc1', title: 'Add circuit breaker', owner: 'Jane', dueDate: '2024-07-01' };
+    const dto = { incidentId: 'inc1', title: 'Add circuit breaker', owner: 'Nethmika', dueDate: '2024-07-01' };
     mockActionItemsService.create.mockResolvedValue({ _id: 'ai1', ...dto });
     const result = await controller.create(dto as any);
     expect(result).toHaveProperty('_id');

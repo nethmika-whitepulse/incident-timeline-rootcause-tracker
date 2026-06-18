@@ -24,6 +24,14 @@ export class User {
   // Login must explicitly opt-in with .select('+password').
   @Prop({ required: true, select: false })
   password: string;
+
+  // Hash of the current refresh token (bcrypt), not the raw token itself —
+  // same reasoning as the password hash. select: false so it's never
+  // returned by default queries either. Cleared on logout, replaced on every
+  // refresh (rotation), so a stolen refresh token only works once before the
+  // legitimate user's next refresh invalidates it.
+  @Prop({ select: false })
+  refreshTokenHash?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

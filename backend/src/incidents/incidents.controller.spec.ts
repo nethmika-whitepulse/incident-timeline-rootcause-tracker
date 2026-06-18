@@ -11,7 +11,7 @@ const mockIncidentsService = {
   remove:  jest.fn(),
 };
 
-const mockUser = { userId: 'user123', email: 'jane@example.com' };
+const mockUser = { userId: 'user123', email: 'nethmika@example.com' };
 const VALID_ID  = '64e0000000000000000000ab';
 
 describe('IncidentsController', () => {

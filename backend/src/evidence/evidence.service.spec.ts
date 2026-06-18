@@ -32,7 +32,7 @@ describe('EvidenceService', () => {
   // ── create() ───────────────────────────────────────────────────────────────
   describe('create()', () => {
     it('should create evidence with file metadata when a file is provided', async () => {
-      const dto  = { incidentId: INCIDENT_ID, type: EvidenceType.Screenshot, uploadedBy: 'Jane' };
+      const dto  = { incidentId: INCIDENT_ID, type: EvidenceType.Screenshot, uploadedBy: 'Nethmika' };
       const file = { originalname: 'screenshot.png', path: 'uploads/screenshot.png' } as any;
       mockModel.create.mockResolvedValue({ _id: VALID_ID, ...dto, filename: file.originalname });
 
@@ -47,7 +47,7 @@ describe('EvidenceService', () => {
     });
 
     it('should create evidence with no filename when no file is provided', async () => {
-      const dto = { incidentId: INCIDENT_ID, type: EvidenceType.Note, uploadedBy: 'Jane', notes: 'stack trace here' };
+      const dto = { incidentId: INCIDENT_ID, type: EvidenceType.Note, uploadedBy: 'Nethmika', notes: 'stack trace here' };
       mockModel.create.mockResolvedValue({ _id: VALID_ID, ...dto });
 
       await service.create(dto as any, undefined);

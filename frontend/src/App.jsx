@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider }    from './context/AuthContext';
+import ProtectedRoute      from './components/ProtectedRoute';
 
-// Page imports — each is a stub component that will be implemented in future PRs
 import Login          from './pages/Login';
 import Register       from './pages/Register';
 import Dashboard      from './pages/Dashboard';
@@ -13,22 +14,36 @@ import ActionItems    from './pages/ActionItems';
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/login"    element={<Login />} />
-        <Route path="/register" element={<Register />} />
+      <AuthProvider>
+        <Routes>
+          {/* Public routes — accessible without a token */}
+          <Route path="/login"    element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        {/* Protected routes — ProtectedRoute wrapper added once AuthContext is implemented */}
-        <Route path="/"                    element={<Dashboard />} />
-        <Route path="/incidents"           element={<IncidentList />} />
-        <Route path="/incidents/new"       element={<CreateIncident />} />
-        <Route path="/incidents/:id"       element={<IncidentDetail />} />
-        <Route path="/incidents/:id/rca"   element={<RCAPage />} />
-        <Route path="/incidents/:id/actions" element={<ActionItems />} />
+          {/* Protected routes — redirect to /login if no valid token */}
+          <Route path="/" element={
+            <ProtectedRoute><Dashboard /></ProtectedRoute>
+          }/>
+          <Route path="/incidents" element={
+            <ProtectedRoute><IncidentList /></ProtectedRoute>
+          }/>
+          <Route path="/incidents/new" element={
+            <ProtectedRoute><CreateIncident /></ProtectedRoute>
+          }/>
+          <Route path="/incidents/:id" element={
+            <ProtectedRoute><IncidentDetail /></ProtectedRoute>
+          }/>
+          <Route path="/incidents/:id/rca" element={
+            <ProtectedRoute><RCAPage /></ProtectedRoute>
+          }/>
+          <Route path="/incidents/:id/actions" element={
+            <ProtectedRoute><ActionItems /></ProtectedRoute>
+          }/>
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }
