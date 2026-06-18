@@ -23,7 +23,7 @@ describe('TimelineController', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('create() should call service.create with dto', async () => {
-    const dto = { incidentId: 'inc1', timestamp: '2024-06-01T09:10:00Z', description: 'Alert triggered', author: 'Jane' };
+    const dto = { incidentId: 'inc1', timestamp: '2024-06-01T09:10:00Z', description: 'Alert triggered', author: 'Nethmika' };
     mockTimelineService.create.mockResolvedValue({ _id: 'evt1', ...dto });
     const result = await controller.create(dto as any);
     expect(mockTimelineService.create).toHaveBeenCalledWith(dto);

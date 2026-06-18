@@ -37,7 +37,7 @@ describe('TimelineService', () => {
         incidentId: INCIDENT_ID,
         timestamp:  '2024-06-01T09:10:00Z',
         description: 'Alert triggered',
-        author: 'Jane',
+        author: 'Nethmika',
       };
       mockModel.create.mockResolvedValue({ _id: VALID_ID, ...dto });
 

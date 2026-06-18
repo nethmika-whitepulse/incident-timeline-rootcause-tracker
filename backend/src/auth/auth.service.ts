@@ -90,7 +90,7 @@ export class AuthService {
     const user = await this.userModel.findById(userId);
     if (!user) throw new UnauthorizedException('User no longer exists');
 
-    return { userId: user._id, name: user.name, email: user.email };
+    return { userId: String(user._id), name: user.name, email: user.email };
   }
 
   // Signs a fresh access/refresh pair, persists a hash of the refresh token

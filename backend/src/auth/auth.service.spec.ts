@@ -49,10 +49,10 @@ describe('AuthService', () => {
   // register() calls findOne() without .select() — use mockResolvedValue directly
   describe('register()', () => {
     it('should throw ConflictException if email already exists', async () => {
-      mockUserModel.findOne.mockResolvedValue({ email: 'jane@example.com' });
+      mockUserModel.findOne.mockResolvedValue({ email: 'nethmika@example.com' });
 
       await expect(
-        service.register({ name: 'Jane', email: 'jane@example.com', password: 'pass1234' }),
+        service.register({ name: 'Nethmika', email: 'nethmika@example.com', password: 'pass1234' }),
       ).rejects.toThrow(ConflictException);
     });
 
@@ -61,7 +61,7 @@ describe('AuthService', () => {
       mockUserModel.create.mockResolvedValue({ _id: 'abc123' });
 
       const result = await service.register({
-        name: 'Jane', email: 'jane@example.com', password: 'pass1234',
+        name: 'Nethmika', email: 'nethmika@example.com', password: 'pass1234',
       });
 
       expect(mockUserModel.create).toHaveBeenCalled();
@@ -84,28 +84,32 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if password is wrong', async () => {
       mockUserModel.findOne.mockReturnValue({
-        select: jest.fn().mockResolvedValue({ email: 'jane@example.com', password: 'hashed' }),
+        select: jest.fn().mockResolvedValue({ email: 'nethmika@example.com', password: 'hashed' }),
       });
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
       await expect(
-        service.login({ email: 'jane@example.com', password: 'wrongpass' }),
+        service.login({ email: 'nethmika@example.com', password: 'wrongpass' }),
       ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should return an access_token and refresh_token on valid credentials', async () => {
       mockUserModel.findOne.mockReturnValue({
         select: jest.fn().mockResolvedValue({
-          _id: 'abc123', email: 'jane@example.com', password: 'hashed',
+          _id: 'abc123', email: 'nethmika@example.com', password: 'hashed', name: 'Nethmika',
         }),
       });
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
       mockUserModel.updateOne.mockResolvedValue({});
 
-      const result = await service.login({ email: 'jane@example.com', password: 'pass1234' });
+      const result = await service.login({ email: 'nethmika@example.com', password: 'pass1234' });
 
       expect(result).toHaveProperty('access_token', 'signed.jwt.token');
       expect(result).toHaveProperty('refresh_token', 'signed.jwt.token');
+      expect(mockJwtService.sign).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Nethmika' }),
+        expect.anything(),
+      );
       // the refresh token's hash gets persisted so it can be looked up on refresh/logout
       expect(mockUserModel.updateOne).toHaveBeenCalledWith(
         { _id: 'abc123' },
@@ -123,7 +127,7 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if the user has no stored refresh token hash', async () => {
-      mockJwtService.verify.mockReturnValue({ sub: 'abc123', email: 'jane@example.com' });
+      mockJwtService.verify.mockReturnValue({ sub: 'abc123', email: 'nethmika@example.com' });
       mockUserModel.findById.mockReturnValue({
         select: jest.fn().mockResolvedValue(null),
       });
@@ -132,9 +136,9 @@ describe('AuthService', () => {
     });
 
     it('should throw UnauthorizedException if the token does not match the stored hash (revoked/rotated)', async () => {
-      mockJwtService.verify.mockReturnValue({ sub: 'abc123', email: 'jane@example.com' });
+      mockJwtService.verify.mockReturnValue({ sub: 'abc123', email: 'nethmika@example.com' });
       mockUserModel.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue({ _id: 'abc123', email: 'jane@example.com', refreshTokenHash: 'stored-hash' }),
+        select: jest.fn().mockResolvedValue({ _id: 'abc123', email: 'nethmika@example.com', name: 'Nethmika', refreshTokenHash: 'stored-hash' }),
       });
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
@@ -142,9 +146,9 @@ describe('AuthService', () => {
     });
 
     it('should rotate and return a new token pair on a valid refresh token', async () => {
-      mockJwtService.verify.mockReturnValue({ sub: 'abc123', email: 'jane@example.com' });
+      mockJwtService.verify.mockReturnValue({ sub: 'abc123', email: 'nethmika@example.com' });
       mockUserModel.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue({ _id: 'abc123', email: 'jane@example.com', refreshTokenHash: 'stored-hash' }),
+        select: jest.fn().mockResolvedValue({ _id: 'abc123', email: 'nethmika@example.com', name: 'Nethmika', refreshTokenHash: 'stored-hash' }),
       });
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
       mockUserModel.updateOne.mockResolvedValue({});
@@ -153,6 +157,10 @@ describe('AuthService', () => {
 
       expect(result).toHaveProperty('access_token', 'signed.jwt.token');
       expect(result).toHaveProperty('refresh_token', 'signed.jwt.token');
+      expect(mockJwtService.sign).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Nethmika' }),
+        expect.anything(),
+      );
     });
   });
 
@@ -180,11 +188,11 @@ describe('AuthService', () => {
     });
 
     it('should return the current user profile', async () => {
-      mockUserModel.findById.mockResolvedValue({ _id: 'abc123', name: 'Jane', email: 'jane@example.com' });
+      mockUserModel.findById.mockResolvedValue({ _id: 'abc123', name: 'Nethmika', email: 'nethmika@example.com' });
 
       const result = await service.me('abc123');
 
-      expect(result).toEqual({ userId: 'abc123', name: 'Jane', email: 'jane@example.com' });
+      expect(result).toEqual({ userId: 'abc123', name: 'Nethmika', email: 'nethmika@example.com' });
     });
   });
 });

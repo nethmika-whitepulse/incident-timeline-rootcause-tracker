@@ -26,7 +26,7 @@ describe('AuthController', () => {
 
   describe('register()', () => {
     it('should call authService.register with the DTO', async () => {
-      const dto = { name: 'Jane', email: 'jane@example.com', password: 'pass1234' };
+      const dto = { name: 'Nethmika', email: 'nethmika@example.com', password: 'pass1234' };
       mockAuthService.register.mockResolvedValue({ message: 'User registered successfully', userId: 'abc123' });
 
       const result = await controller.register(dto);
@@ -38,7 +38,7 @@ describe('AuthController', () => {
 
   describe('login()', () => {
     it('should return an access_token and refresh_token on valid credentials', async () => {
-      const dto = { email: 'jane@example.com', password: 'pass1234' };
+      const dto = { email: 'nethmika@example.com', password: 'pass1234' };
       mockAuthService.login.mockResolvedValue({ access_token: 'jwt.token.here', refresh_token: 'refresh.token.here' });
 
       const result = await controller.login(dto);
@@ -74,12 +74,12 @@ describe('AuthController', () => {
 
   describe('me()', () => {
     it('should call authService.me with the authenticated user id', async () => {
-      mockAuthService.me.mockResolvedValue({ userId: 'abc123', name: 'Jane', email: 'jane@example.com' });
+      mockAuthService.me.mockResolvedValue({ userId: 'abc123', name: 'Nethmika', email: 'nethmika@example.com' });
 
       const result = await controller.me({ user: { userId: 'abc123' } });
 
       expect(mockAuthService.me).toHaveBeenCalledWith('abc123');
-      expect(result).toHaveProperty('email', 'jane@example.com');
+      expect(result).toHaveProperty('email', 'nethmika@example.com');
     });
   });
 });

@@ -23,7 +23,7 @@ describe('EvidenceController', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('create() should call service.create', async () => {
-    const dto = { incidentId: 'inc1', type: EvidenceType.Log, uploadedBy: 'Jane', notes: 'stack trace' };
+    const dto = { incidentId: 'inc1', type: EvidenceType.Log, uploadedBy: 'Nethmika', notes: 'stack trace' };
     mockEvidenceService.create.mockResolvedValue({ _id: 'ev1', ...dto });
     const result = await controller.create(dto as any, undefined);
     expect(mockEvidenceService.create).toHaveBeenCalledWith(dto, undefined);
