@@ -2,26 +2,26 @@
 export const formatDate = (dateString) => {
   if (!dateString) return '—';
   return new Date(dateString).toLocaleDateString('en-GB', {
-    day:   '2-digit',
-    month: 'short',
-    year:  'numeric',
+    day: '2-digit', month: 'short', year: 'numeric',
   });
 };
 
 export const formatDateTime = (dateString) => {
   if (!dateString) return '—';
   return new Date(dateString).toLocaleString('en-GB', {
-    day:    '2-digit',
-    month:  'short',
-    year:   'numeric',
-    hour:   '2-digit',
-    minute: '2-digit',
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
   });
 };
 
 export const formatRelativeTime = (dateString) => {
   if (!dateString) return '—';
-  const diff = Date.now() - new Date(dateString).getTime();
+  const date = new Date(dateString);
+  // new Date() on a malformed string returns an Invalid Date object — getTime()
+  // on it produces NaN, which would silently corrupt every comparison below
+  // and eventually render the literal string "Invalid Date" in the UI.
+  if (isNaN(date.getTime())) return '—';
+  const diff  = Date.now() - date.getTime();
   const mins  = Math.floor(diff / 60000);
   const hours = Math.floor(mins / 60);
   const days  = Math.floor(hours / 24);
@@ -57,8 +57,8 @@ export const statusClass = (status) => ({
 }[status] ?? 'badge badge-closed');
 
 // ── Error message extractor ───────────────────────────────────────────────────
-// Axios errors can carry the message in different shapes depending on whether
-// the server returned a validation error array or a single message string.
+// Axios errors carry the server message in different shapes depending on
+// whether it's a validation array or a single message string.
 export const getErrorMessage = (error) => {
   const data = error?.response?.data;
   if (!data) return 'Something went wrong. Please try again.';
