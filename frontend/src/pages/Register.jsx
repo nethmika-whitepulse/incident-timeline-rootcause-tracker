@@ -7,8 +7,9 @@ import { getErrorMessage }       from '../utils/helpers';
 import AppLogo from '../components/AppLogo';
 
 export default function Register() {
-  const { user }                    = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate                    = useNavigate();
+  const MIN_PASSWORD_LENGTH         = 8;
   const [form, setForm]             = useState({ name: '', email: '', password: '' });
   const [error, setError]           = useState('');
   const [success, setSuccess]       = useState(false);
@@ -39,8 +40,8 @@ export default function Register() {
     e.preventDefault();
     setError('');
 
-    if (form.password.length < 8) {
-      setError('Password must be at least 8 characters.');
+    if (form.password.length < MIN_PASSWORD_LENGTH) {
+      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
       return;
     }
 
@@ -61,6 +62,8 @@ export default function Register() {
 
         <AppLogo />
 
+        {!authLoading && (
+          <>
         <div className="card">
           {success ? (
             /* ── Success state ─────────────────────────────────────────────── */
@@ -77,7 +80,6 @@ export default function Register() {
               </div>
             </div>
           ) : (
-            /* ── Registration form ─────────────────────────────────────────── */
             <>
               <p className="text-sm text-gray-500 mb-5">
                 Create your account to get started
@@ -144,7 +146,7 @@ export default function Register() {
                       className="input pr-14"
                       placeholder="••••••••"
                       required
-                      minLength={8}
+                      minLength={MIN_PASSWORD_LENGTH}
                       autoComplete="new-password"
                     />
                     <button
@@ -158,7 +160,6 @@ export default function Register() {
                   </div>
                 </div>
 
-                {/* Submit */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -184,6 +185,8 @@ export default function Register() {
             Sign in
           </Link>
         </p>
+          </>
+        )}
 
       </div>
     </div>

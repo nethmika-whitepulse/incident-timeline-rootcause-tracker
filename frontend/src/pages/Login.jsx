@@ -1,4 +1,4 @@
-import { useState, useEffect }   from 'react';
+import { useState, useEffect, useRef }   from 'react';
 import { Link, useNavigate }     from 'react-router-dom';
 import { useAuth }               from '../context/AuthContext';
 import api                       from '../api/axios';
@@ -8,12 +8,14 @@ import AppLogo from '../components/AppLogo';
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function Login() {
-  const { login, user }           = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const navigate                  = useNavigate();
   const [form, setForm]           = useState({ email: '', password: '' });
   const [error, setError]         = useState('');
   const [loading, setLoading]     = useState(false);
   const [showPass, setShowPass]   = useState(false);
+
+  const inFlight = useRef(false);
 
   // Redirect already-authenticated users to the dashboard. This must run in
   // useEffect, not directly in the render body — calling navigate() during
@@ -28,16 +30,26 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (inFlight.current) return;
+    inFlight.current = true;
+
     setError('');
     setLoading(true);
+
     try {
-      const { data } = await api.post('/auth/login', form);
-      // AuthContext.login stores both tokens and decodes name from the payload
-      login(data.access_token, data.refresh_token);
-      navigate('/');
+        const { data } = await api.post('/auth/login', form);
+        try {
+            login(data.access_token, data.refresh_token);
+        } catch {
+            setError('Login succeeded but the session token was invalid. Please try again.');
+            return;
+        }
+        navigate('/');
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
+      inFlight.current = false;
       setLoading(false);
     }
   };
@@ -48,6 +60,8 @@ export default function Login() {
 
         <AppLogo />
 
+        {!authLoading && (
+          <>
         {/* Card */}
         <div className="card">
           <p className="text-sm text-gray-500 mb-5">
@@ -133,6 +147,8 @@ export default function Login() {
             Create one
           </Link>
         </p>
+          </>
+        )}
 
       </div>
     </div>

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Global base styles — Panze aesthetic ─────────────────────────────────── */
+/* ── Global base styles  */
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
@@ -11,12 +11,12 @@
 
   body {
     @apply bg-gray-50 text-gray-800;
-    /* Warm gradient background — mirrors the Panze dashboard feel */
+    /* Warm gradient background */
     background: linear-gradient(135deg, #fff7f0 0%, #f8f9ff 50%, #f0f4ff 100%);
     min-height: 100vh;
   }
 
-  /* Custom scrollbar — subtle, matches the clean aesthetic */
+  /* Custom scrollbar  */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -44,6 +44,7 @@
   .badge-p2 { @apply bg-orange-50 text-orange-700 border border-orange-100; }
   .badge-p3 { @apply bg-yellow-50 text-yellow-700 border border-yellow-100; }
   .badge-p4 { @apply bg-blue-50 text-blue-700 border border-blue-100; }
+  .badge-unknown { @apply bg-gray-100 text-gray-500 border border-gray-300; }
 
   /* Status badge colors */
   .badge-open         { @apply bg-red-50 text-red-600 border border-red-100; }

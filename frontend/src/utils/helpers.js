@@ -1,4 +1,3 @@
-// ── Date formatting ───────────────────────────────────────────────────────────
 export const formatDate = (dateString) => {
   if (!dateString) return '—';
   const date = new Date(dateString);
@@ -25,7 +24,8 @@ export const formatRelativeTime = (dateString) => {
   // on it produces NaN, which would silently corrupt every comparison below
   // and eventually render the literal string "Invalid Date" in the UI.
   if (isNaN(date.getTime())) return '—';
-  const diff  = Date.now() - date.getTime();
+  const diff = Date.now() - date.getTime();
+  if (diff < 0) return formatDate(dateString);
   const mins  = Math.floor(diff / 60000);
   const hours = Math.floor(mins / 60);
   const days  = Math.floor(hours / 24);
@@ -38,8 +38,9 @@ export const formatRelativeTime = (dateString) => {
 
 export const formatDuration = (minutes) => {
   if (minutes == null) return '—';
-  const h = Math.floor(minutes / 60);
-  const m = Math.round(minutes % 60);
+  const totalMins = Math.round(minutes);
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
   if (h === 0) return `${m}m`;
   if (m === 0) return `${h}h`;
   return `${h}h ${m}m`;
@@ -51,14 +52,14 @@ export const severityClass = (severity) => ({
   P2: 'badge badge-p2',
   P3: 'badge badge-p3',
   P4: 'badge badge-p4',
-}[severity] ?? 'badge badge-p4');
+}[severity] ?? 'badge badge-unknown');
 
 export const statusClass = (status) => ({
   Open:          'badge badge-open',
   Investigating: 'badge badge-investigating',
   Resolved:      'badge badge-resolved',
   Closed:        'badge badge-closed',
-}[status] ?? 'badge badge-closed');
+}[status] ?? 'badge badge-unknown');
 
 // ── Error message extractor ───────────────────────────────────────────────────
 // Axios errors carry the server message in different shapes depending on
