@@ -1,14 +1,18 @@
 // ── Date formatting ───────────────────────────────────────────────────────────
 export const formatDate = (dateString) => {
   if (!dateString) return '—';
-  return new Date(dateString).toLocaleDateString('en-GB', {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '—';
+  return date.toLocaleDateString('en-GB', {
     day: '2-digit', month: 'short', year: 'numeric',
   });
 };
 
 export const formatDateTime = (dateString) => {
   if (!dateString) return '—';
-  return new Date(dateString).toLocaleString('en-GB', {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '—';
+  return date.toLocaleString('en-GB', {
     day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
