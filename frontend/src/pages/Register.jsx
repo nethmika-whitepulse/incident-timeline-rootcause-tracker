@@ -71,7 +71,7 @@ export default function Register() {
 
         {!authLoading && (
           <>
-        <div className="card">
+            <div className="card">
           {success ? (
             /* ── Success state ─────────────────────────────────────────────── */
             <div className="flex flex-col items-center py-4 gap-3 text-center">
@@ -181,7 +181,7 @@ export default function Register() {
               </form>
             </>
           )}
-        </div>
+            </div>
 
         <p className="text-center text-sm text-gray-400 mt-6">
           Already have an account?{' '}

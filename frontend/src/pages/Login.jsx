@@ -62,11 +62,11 @@ export default function Login() {
 
         {!authLoading && (
           <>
-        {/* Card */}
-        <div className="card">
-          <p className="text-sm text-gray-500 mb-5">
+            {/* Card */}
+            <div className="card">
+            <p className="text-sm text-gray-500 mb-5">
             Sign in to your workspace
-          </p>
+            </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -135,7 +135,7 @@ export default function Login() {
             </button>
 
           </form>
-        </div>
+            </div>
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-400 mt-6">
