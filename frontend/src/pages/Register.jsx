@@ -1,4 +1,4 @@
-import { useState, useEffect }   from 'react';
+import { useState, useEffect, useRef }   from 'react';
 import { Link, useNavigate }     from 'react-router-dom';
 import { useAuth }               from '../context/AuthContext';
 import api                       from '../api/axios';
@@ -6,15 +6,17 @@ import { getErrorMessage }       from '../utils/helpers';
 
 import AppLogo from '../components/AppLogo';
 
+const MIN_PASSWORD_LENGTH = 8;
+
 export default function Register() {
   const { user, loading: authLoading } = useAuth();
   const navigate                    = useNavigate();
-  const MIN_PASSWORD_LENGTH         = 8;
   const [form, setForm]             = useState({ name: '', email: '', password: '' });
   const [error, setError]           = useState('');
   const [success, setSuccess]       = useState(false);
   const [loading, setLoading]       = useState(false);
   const [showPass, setShowPass]     = useState(false);
+  const inFlight = useRef(false);
 
   // Redirect already-authenticated users to the dashboard — must run in
   // useEffect, not in the render body, since navigate() is a side effect.
@@ -38,12 +40,16 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setError('');
 
     if (form.password.length < MIN_PASSWORD_LENGTH) {
       setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
       return;
     }
+
+    if (inFlight.current) return;
+    inFlight.current = true;
 
     setLoading(true);
     try {
@@ -52,6 +58,7 @@ export default function Register() {
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
+      inFlight.current = false;
       setLoading(false);
     }
   };
@@ -134,7 +141,7 @@ export default function Register() {
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Password
                     <span className="text-gray-400 font-normal ml-1">
-                      (min. 8 characters)
+                      (min. {MIN_PASSWORD_LENGTH} characters)
                     </span>
                   </label>
                   <div className="relative">
