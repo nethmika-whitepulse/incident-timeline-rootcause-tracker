@@ -1,3 +1,6 @@
+// Shared app logo used on Login and Register pages.
+// Extracted to avoid duplicating the SVG markup in two files — any branding
+// change (icon, name, size) now only needs to happen here.
 export default function AppLogo() {
   return (
     <div className="flex flex-col items-center mb-8">

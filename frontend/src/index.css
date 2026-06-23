@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Global base styles  */
+/* ── Global base styles — Panze aesthetic ─────────────────────────────────── */
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
@@ -11,12 +11,12 @@
 
   body {
     @apply bg-gray-50 text-gray-800;
-    /* Warm gradient background */
+    /* Warm gradient background — mirrors the Panze dashboard feel */
     background: linear-gradient(135deg, #fff7f0 0%, #f8f9ff 50%, #f0f4ff 100%);
     min-height: 100vh;
   }
 
-  /* Custom scrollbar  */
+  /* Custom scrollbar — subtle, matches the clean aesthetic */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -60,10 +60,6 @@
     @apply bg-blue-50 text-blue-700 border border-blue-100;
   }
 
-  .badge-unknown {
-    @apply bg-gray-100 text-gray-500 border border-gray-300;
-  }
-
   /* Status badge colors */
   .badge-open {
     @apply bg-red-50 text-red-600 border border-red-100;
@@ -79,6 +75,12 @@
 
   .badge-closed {
     @apply bg-gray-100 text-gray-500 border border-gray-200;
+  }
+
+  /* Unknown/unrecognised severity or status — visually distinct so stale
+     frontends surface the gap when the backend adds a new value */
+  .badge-unknown {
+    @apply bg-gray-100 text-gray-500 border border-gray-300;
   }
 
   /* Shared badge shape */

@@ -6,7 +6,6 @@ import { getErrorMessage } from "../utils/helpers";
 
 import AppLogo from "../components/AppLogo";
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 export default function Login() {
   const { login, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -14,13 +13,9 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
-
   const inFlight = useRef(false);
 
-  // Redirect already-authenticated users to the dashboard. This must run in
-  // useEffect, not directly in the render body — calling navigate() during
-  // render is a side effect and breaks React's rules of render (and causes
-  // double-invocation issues under Strict Mode).
+  // Redirect already-authenticated users — must be in useEffect, not render body
   useEffect(() => {
     if (user) navigate("/", { replace: true });
   }, [user, navigate]);
@@ -70,14 +65,14 @@ export default function Login() {
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Error banner */}
                 {error && (
-                  <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">
+                  <div
+                    className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl"
+                  >
                     {error}
                   </div>
                 )}
 
-                {/* Email */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Email address
@@ -95,7 +90,6 @@ export default function Login() {
                   />
                 </div>
 
-                {/* Password */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">
                     Password
@@ -122,14 +116,15 @@ export default function Login() {
                   </div>
                 </div>
 
-                {/* Submit */}
                 <button
                   type="submit"
                   disabled={loading}
                   className="btn-primary w-full flex items-center justify-center gap-2 mt-1"
                 >
                   {loading && (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div
+                      className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                    />
                   )}
                   {loading ? "Signing in…" : "Sign in"}
                 </button>
