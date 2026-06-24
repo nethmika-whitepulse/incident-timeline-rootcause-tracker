@@ -1,29 +1,37 @@
-import { useState, useRef, useEffect } from 'react';
-import { useAuth }                     from '../../context/AuthContext';
+import { useState, useRef, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 // Generates a deterministic avatar color from the user's name
 function avatarColor(name) {
   const colors = [
-    'bg-blue-100 text-blue-700',
-    'bg-green-100 text-green-700',
-    'bg-purple-100 text-purple-700',
-    'bg-amber-100 text-amber-700',
-    'bg-pink-100 text-pink-700',
+    "bg-blue-100 text-blue-700",
+    "bg-green-100 text-green-700",
+    "bg-purple-100 text-purple-700",
+    "bg-amber-100 text-amber-700",
+    "bg-pink-100 text-pink-700",
   ];
-  const hash = (name || '').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const hash = (name || "")
+    .split("")
+    .reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return colors[hash % colors.length];
 }
 
 function initials(name) {
-  if (!name) return '?';
-  return name.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  if (!name) return "?";
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 }
 
 export default function Navbar({ title, subtitle }) {
-  const { user, logout }  = useAuth();
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef           = useRef(null);
-  const triggerRef        = useRef(null);
+  const menuRef = useRef(null);
+  const triggerRef = useRef(null);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -32,20 +40,20 @@ export default function Navbar({ title, subtitle }) {
         setMenuOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   // Close on Escape key — standard dropdown accessibility pattern
   useEffect(() => {
     const handleKey = (e) => {
-      if (e.key === 'Escape' && menuOpen) {
+      if (e.key === "Escape" && menuOpen) {
         setMenuOpen(false);
         triggerRef.current?.focus(); // return focus to the trigger button
       }
     };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
   }, [menuOpen]);
 
   const handleLogout = async () => {
@@ -55,14 +63,11 @@ export default function Navbar({ title, subtitle }) {
 
   return (
     <header className="flex items-center justify-between mb-8 gap-4">
-
       <div>
         <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
           {title}
         </h1>
-        {subtitle && (
-          <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>
-        )}
+        {subtitle && <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>}
       </div>
 
       {/* User menu */}
@@ -72,19 +77,34 @@ export default function Navbar({ title, subtitle }) {
           onClick={() => setMenuOpen((v) => !v)}
           aria-expanded={menuOpen}
           aria-haspopup="menu"
-          aria-label={`Account menu for ${user?.name ?? 'user'}`}
-          className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full bg-white border border-gray-100 shadow-sm hover:border-gray-200 transition-colors"
+          aria-label={`Account menu for ${user?.name ?? "user"}`}
+          className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full
+                     bg-white border border-gray-100 shadow-sm hover:border-gray-200
+                     transition-colors"
         >
-          <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${avatarColor(user?.name)}`} aria-hidden="true">
+          <div
+            className={`w-7 h-7 rounded-full flex items-center justify-center
+                           text-xs font-semibold ${avatarColor(user?.name)}`}
+            aria-hidden="true"
+          >
             {initials(user?.name)}
           </div>
           <span className="text-sm font-medium text-gray-700 hidden sm:inline">
             {user?.name ?? 'Account'}
           </span>
-          <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor"
-            strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          <svg
+            className="w-3.5 h-3.5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+            />
           </svg>
         </button>
 
@@ -110,7 +130,6 @@ export default function Navbar({ title, subtitle }) {
           </div>
         )}
       </div>
-
     </header>
   );
 }

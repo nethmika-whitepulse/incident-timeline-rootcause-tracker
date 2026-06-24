@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { Link } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout";
 import SeverityBadge from "../components/badges/SeverityBadge";
@@ -120,15 +121,15 @@ function SeverityDonut({ data }) {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  // useApi handles loading, error, and AbortController cancellation
-  const {
-    data: summary,
-    loading,
-    error,
-  } = useApi(
+  // useCallback gives apiFn a stable reference — required because useApi now
+  // includes apiFn in its deps. Without this, a new arrow function would be
+  // created on every render, triggering an infinite fetch loop.
+  const fetchDashboard = useCallback(
     (signal) => api.get("/dashboard", { signal }),
-    [], // fetch once on mount
+    [], // no captured values — stable for the component's lifetime
   );
+
+  const { data: summary, loading, error } = useApi(fetchDashboard, []);
 
   return (
     <AppLayout title="Dashboard" subtitle="Incident management overview">
