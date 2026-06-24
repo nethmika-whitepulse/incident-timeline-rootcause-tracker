@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
-import { NAV_ITEMS } from "./Sidebar";
+import { NAV_ITEMS } from "../../constants/navItems";
 
 // ── Mobile bottom navigation ──────────────────────────────────────────────────
-// Shown only on screens smaller than md (below 768px) — the desktop sidebar
-// is hidden at this breakpoint and this provides the alternative navigation.
-// Uses the same NAV_ITEMS array as the sidebar so they never drift out of sync.
+// Visible only below the md breakpoint where the desktop Sidebar is hidden.
+// Both this and Sidebar import NAV_ITEMS from src/constants/navItems.jsx —
+// neither component depends on the other so they can be lazy-loaded or
+// code-split independently without breaking each other.
 export default function MobileNav() {
   return (
     <nav

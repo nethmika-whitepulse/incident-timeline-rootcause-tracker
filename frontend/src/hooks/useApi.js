@@ -1,12 +1,17 @@
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "../utils/helpers";
 
-// ── Standardized API hook ─────────────────────────────────────────────────────
-// Encapsulates the loading / error / cancel pattern that every data-fetching
-// component needs. Uses AbortController to actually cancel the in-flight
-// network request when the component unmounts — unlike a `cancelled` flag
-// which only ignores the response after it arrives.
-
+/**
+ * Standardized API hook
+ * Handles loading, error, and request cancellation.
+ *
+ * CONTRACT:
+ * - apiFn must be stable across renders.
+ * - If apiFn uses props/state values, it MUST be wrapped in useCallback.
+ *
+ * Example:
+ * useApi((signal) => api.get(`/users/${id}`, { signal }), [id]);
+ */
 export function useApi(apiFn, deps = []) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,25 +19,28 @@ export function useApi(apiFn, deps = []) {
 
   useEffect(() => {
     const controller = new AbortController();
+
     setLoading(true);
     setError("");
 
     apiFn(controller.signal)
       .then(({ data: responseData }) => setData(responseData))
       .catch((err) => {
-        // AbortController cancellations are not real errors — ignore them
+        // Ignore cancellations
         if (err.name === "CanceledError" || err.name === "AbortError") return;
+
         const msg = getErrorMessage(err);
         setError(msg);
-        // Centralised error logging — swap console.error for a real logging
-        // service (Sentry, Datadog, etc.) in production without touching call sites
         console.error("[useApi]", err);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
 
     return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+
+    // apiFn is intentionally included to avoid stale closures
+  }, [...deps, apiFn]);
 
   return { data, loading, error };
 }

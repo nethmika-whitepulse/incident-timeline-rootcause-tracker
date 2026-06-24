@@ -171,7 +171,7 @@ export default function Dashboard() {
             <StatCard
               label="Recently Closed"
               value={(summary.recentlyClosed ?? []).length}
-              sublabel="last 5 shown below"
+              sublabel="latest 5 incidents"
               accent="bg-green-50 text-green-500"
             />
           </div>
