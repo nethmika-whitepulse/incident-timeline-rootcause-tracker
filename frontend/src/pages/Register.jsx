@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 import { getErrorMessage } from "../utils/helpers";
-
 import AppLogo from "../components/AppLogo";
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -18,17 +17,12 @@ export default function Register() {
   const [showPass, setShowPass] = useState(false);
   const inFlight = useRef(false);
 
-  // Redirect already-authenticated users to the dashboard — must run in
-  // useEffect, not in the render body, since navigate() is a side effect.
+  // Redirect already-authenticated users
   useEffect(() => {
     if (user) navigate("/", { replace: true });
   }, [user, navigate]);
 
-  // After a successful registration, redirect to /login after 2 seconds so
-  // the user can read the confirmation. The cleanup function cancels the
-  // timer if the component unmounts first (e.g. the user clicks "Sign in"
-  // manually before the delay finishes) — prevents a setTimeout leak and a
-  // "can't update state on an unmounted component" warning.
+  // Auto-redirect to /login after successful registration
   useEffect(() => {
     if (!success) return;
     const timer = setTimeout(() => navigate("/login"), 2000);
@@ -40,9 +34,9 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setError("");
 
+    // Validate before marking in-flight so a bad password doesn't lock the form
     if (form.password.length < MIN_PASSWORD_LENGTH) {
       setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
       return;
@@ -50,7 +44,6 @@ export default function Register() {
 
     if (inFlight.current) return;
     inFlight.current = true;
-
     setLoading(true);
     try {
       await api.post("/auth/register", form);
@@ -72,9 +65,11 @@ export default function Register() {
           <>
             <div className="card">
               {success ? (
-                /* ── Success state ─────────────────────────────────────────────── */
+                /* ── Success state ───────────────────────────────────────── */
                 <div className="flex flex-col items-center py-4 gap-3 text-center">
-                  <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center border border-green-100">
+                  <div
+                    className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center border border-green-100"
+                  >
                     <svg
                       className="w-5 h-5 text-green-600"
                       fill="none"
@@ -100,6 +95,7 @@ export default function Register() {
                   </div>
                 </div>
               ) : (
+                /* ── Registration form ───────────────────────────────────── */
                 <>
                   <p className="text-sm text-gray-500 mb-5">
                     Create your account to get started
@@ -112,7 +108,6 @@ export default function Register() {
                       </div>
                     )}
 
-                    {/* Name */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
                         Full name
@@ -131,7 +126,6 @@ export default function Register() {
                       />
                     </div>
 
-                    {/* Email */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
                         Email address
@@ -148,7 +142,6 @@ export default function Register() {
                       />
                     </div>
 
-                    {/* Password */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
                         Password
@@ -185,7 +178,9 @@ export default function Register() {
                       className="btn-primary w-full flex items-center justify-center gap-2 mt-1"
                     >
                       {loading && (
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div
+                          className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                        />
                       )}
                       {loading ? "Creating account…" : "Create account"}
                     </button>

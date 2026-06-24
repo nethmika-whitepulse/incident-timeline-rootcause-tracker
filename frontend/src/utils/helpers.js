@@ -1,3 +1,4 @@
+// ── Date formatting ───────────────────────────────────────────────────────────
 export const formatDate = (dateString) => {
   if (!dateString) return '—';
   const date = new Date(dateString);
@@ -20,9 +21,6 @@ export const formatDateTime = (dateString) => {
 export const formatRelativeTime = (dateString) => {
   if (!dateString) return '—';
   const date = new Date(dateString);
-  // new Date() on a malformed string returns an Invalid Date object — getTime()
-  // on it produces NaN, which would silently corrupt every comparison below
-  // and eventually render the literal string "Invalid Date" in the UI.
   if (Number.isNaN(date.getTime())) return '—';
   const diff = Date.now() - date.getTime();
   if (diff < 0) return formatDate(dateString);
@@ -38,6 +36,9 @@ export const formatRelativeTime = (dateString) => {
 
 export const formatDuration = (minutes) => {
   if (minutes == null) return '—';
+  // Guard against negative values (e.g. corrupted data, clock skew)
+  if (minutes <= 0) return '0m';
+  // Round total first — rounding the remainder alone can produce m = 60
   const totalMins = Math.round(minutes);
   const h = Math.floor(totalMins / 60);
   const m = totalMins % 60;
@@ -47,23 +48,28 @@ export const formatDuration = (minutes) => {
 };
 
 // ── Badge class helpers ───────────────────────────────────────────────────────
-export const severityClass = (severity) => ({
+// Lookup objects defined at module level — not recreated on every call
+const SEVERITY_CLASSES = {
   P1: 'badge badge-p1',
   P2: 'badge badge-p2',
   P3: 'badge badge-p3',
   P4: 'badge badge-p4',
-}[severity] ?? 'badge badge-unknown');
+};
 
-export const statusClass = (status) => ({
+const STATUS_CLASSES = {
   Open:          'badge badge-open',
   Investigating: 'badge badge-investigating',
   Resolved:      'badge badge-resolved',
   Closed:        'badge badge-closed',
-}[status] ?? 'badge badge-unknown');
+};
+
+export const severityClass = (severity) =>
+  SEVERITY_CLASSES[severity] ?? 'badge badge-unknown';
+
+export const statusClass = (status) =>
+  STATUS_CLASSES[status] ?? 'badge badge-unknown';
 
 // ── Error message extractor ───────────────────────────────────────────────────
-// Axios errors carry the server message in different shapes depending on
-// whether it's a validation array or a single message string.
 export const getErrorMessage = (error) => {
   const data = error?.response?.data;
   if (!data) return 'Something went wrong. Please try again.';
