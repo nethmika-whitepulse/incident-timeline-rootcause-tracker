@@ -26,6 +26,15 @@ export default function CreateIncident() {
     e.preventDefault();
     setError("");
 
+    if (!form.title.trim()) {
+      setError("Title is required.");
+      return;
+    }
+    if (form.title.trim().length < 3) {
+      setError("Title must be at least 3 characters.");
+      return;
+    }
+
     if (form.endTime && form.startTime && form.endTime <= form.startTime) {
       setError("End time must be after start time.");
       return;

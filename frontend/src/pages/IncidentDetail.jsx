@@ -15,6 +15,9 @@ import {
 const STATUSES = ["Open", "Investigating", "Resolved", "Closed"];
 const TABS = ["Timeline", "Evidence", "RCA", "Action Items"];
 
+// Converts a tab label to a valid HTML id segment (spaces → hyphens)
+const tabId = (tab) => tab.toLowerCase().replace(/\s+/g, "-");
+
 // ── Timeline tab ──────────────────────────────────────────────────────────────
 function TimelineSection({ incidentId }) {
   const fetch = useCallback(
@@ -72,7 +75,8 @@ function EvidenceSection({ incidentId }) {
           className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100"
         >
           <div
-            className="shrink-0 w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center" aria-hidden="true"
+            className="shrink-0 w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center"
+            aria-hidden="true"
           >
             <svg
               className="w-4 h-4 text-gray-400"
@@ -118,11 +122,14 @@ function RcaSection({ incidentId }) {
     (signal) => api.get(`/rca/${incidentId}`, { signal }),
     [incidentId],
   );
-  const { data: rca, loading, error } = useApi(fetch, [incidentId]);
+  const { data: rca, loading, error, statusCode } = useApi(fetch, [incidentId]);
 
   if (loading) return <SectionSpinner />;
-  // 404 from the server means no RCA yet — treat as empty, not an error
-  if (error) return <SectionEmpty message="No RCA document yet." />;
+  if (error) {
+    if (statusCode === 404)
+      return <SectionEmpty message="No RCA document yet." />;
+    return <SectionError message={error} />;
+  }
   if (!rca) return <SectionEmpty message="No RCA document yet." />;
 
   return (
@@ -421,8 +428,8 @@ export default function IncidentDetail() {
                   key={tab}
                   role="tab"
                   aria-selected={activeTab === tab}
-                  aria-controls={`panel-${tab}`}
-                  id={`tab-${tab}`}
+                  aria-controls={`panel-${tabId(tab)}`}
+                  id={`tab-${tabId(tab)}`}
                   onClick={() => setActiveTab(tab)}
                   className={`flex-1 px-4 py-3 text-sm font-medium transition-colors
                                border-b-2 -mb-px
@@ -441,36 +448,36 @@ export default function IncidentDetail() {
             <div className="p-6">
               {activeTab === "Timeline" && (
                 <section
-                  id="panel-Timeline"
+                  id="panel-timeline"
                   role="tabpanel"
-                  aria-labelledby="tab-Timeline"
+                  aria-labelledby="tab-timeline"
                 >
                   <TimelineSection incidentId={id} />
                 </section>
               )}
               {activeTab === "Evidence" && (
                 <section
-                  id="panel-Evidence"
+                  id="panel-evidence"
                   role="tabpanel"
-                  aria-labelledby="tab-Evidence"
+                  aria-labelledby="tab-evidence"
                 >
                   <EvidenceSection incidentId={id} />
                 </section>
               )}
               {activeTab === "RCA" && (
                 <section
-                  id="panel-RCA"
+                  id="panel-rca"
                   role="tabpanel"
-                  aria-labelledby="tab-RCA"
+                  aria-labelledby="tab-rca"
                 >
                   <RcaSection incidentId={id} />
                 </section>
               )}
               {activeTab === "Action Items" && (
                 <section
-                  id="panel-Action Items"
+                  id="panel-action-items"
                   role="tabpanel"
-                  aria-labelledby="tab-Action Items"
+                  aria-labelledby="tab-action-items"
                 >
                   <ActionItemsSection incidentId={id} />
                 </section>
