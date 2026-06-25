@@ -90,7 +90,7 @@ export default function Navbar({ title, subtitle }) {
             {initials(user?.name)}
           </div>
           <span className="text-sm font-medium text-gray-700 hidden sm:inline">
-            {user?.name ?? 'Account'}
+            {user?.name ?? "Account"}
           </span>
           <svg
             className="w-3.5 h-3.5 text-gray-400"

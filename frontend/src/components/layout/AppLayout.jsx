@@ -1,6 +1,6 @@
-import Sidebar   from './Sidebar';
-import MobileNav from './MobileNav';
-import Navbar    from './Navbar';
+import Sidebar from "./Sidebar";
+import MobileNav from "./MobileNav";
+import Navbar from "./Navbar";
 
 // Shared shell for every authenticated page.
 // Desktop: sidebar on the left, content on the right.
