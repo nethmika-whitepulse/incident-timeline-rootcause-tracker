@@ -45,7 +45,6 @@ export default function CreateIncident() {
     setLoading(true);
 
     try {
-      // Strip empty optional fields so they aren't sent as empty strings
       const payload = { title: form.title, severity: form.severity };
       if (form.description) payload.description = form.description;
       if (form.startTime) payload.startTime = form.startTime;
@@ -93,9 +92,7 @@ export default function CreateIncident() {
                 htmlFor="title"
               >
                 Title{" "}
-                <span className="text-red-400" aria-hidden="true">
-                  *
-                </span>
+                <span className="text-red-400" aria-hidden="true">*</span>
               </label>
               <input
                 id="title"
@@ -119,9 +116,7 @@ export default function CreateIncident() {
                 htmlFor="description"
               >
                 Description
-                <span className="text-gray-400 font-normal ml-1">
-                  (optional)
-                </span>
+                <span className="text-gray-400 font-normal ml-1">(optional)</span>
               </label>
               <textarea
                 id="description"
@@ -142,15 +137,9 @@ export default function CreateIncident() {
                 htmlFor="severity"
               >
                 Severity{" "}
-                <span className="text-red-400" aria-hidden="true">
-                  *
-                </span>
+                <span className="text-red-400" aria-hidden="true">*</span>
               </label>
-              <div
-                className="flex gap-2"
-                role="group"
-                aria-label="Severity level"
-              >
+              <div className="flex gap-2" role="group" aria-label="Severity level">
                 {SEVERITIES.map((s) => (
                   <label
                     key={s}
@@ -188,9 +177,7 @@ export default function CreateIncident() {
                   htmlFor="startTime"
                 >
                   Start time
-                  <span className="text-gray-400 font-normal ml-1">
-                    (optional)
-                  </span>
+                  <span className="text-gray-400 font-normal ml-1">(optional)</span>
                 </label>
                 <input
                   id="startTime"
@@ -207,9 +194,7 @@ export default function CreateIncident() {
                   htmlFor="endTime"
                 >
                   End time
-                  <span className="text-gray-400 font-normal ml-1">
-                    (optional)
-                  </span>
+                  <span className="text-gray-400 font-normal ml-1">(optional)</span>
                 </label>
                 <input
                   id="endTime"
