@@ -82,3 +82,10 @@ export const getErrorMessage = (error) => {
   if (typeof data.message === 'string') return data.message;
   return 'Something went wrong. Please try again.';
 };
+
+// ── Action item status classes ────────────────────────────────────────────────
+export const ACTION_ITEM_STATUS_CLASSES = {
+  Open: "bg-red-50 text-red-600",
+  "In Progress": "bg-amber-50 text-amber-700",
+  Done: "bg-green-50 text-green-700",
+};
