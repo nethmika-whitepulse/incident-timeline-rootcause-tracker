@@ -271,6 +271,7 @@ const ALLOWED_EXTENSIONS = ".png,.jpg,.jpeg,.gif,.txt,.pdf";
 
 function EvidenceForm({ incidentId, onSuccess, onCancel }) {
   const inFlight = useRef(false);
+  const fileInputRef = useRef(null);
   const [form, setForm] = useState({
     type: "screenshot",
     uploadedBy: "",
@@ -283,7 +284,22 @@ function EvidenceForm({ incidentId, onSuccess, onCancel }) {
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleFile = (e) => setFile(e.target.files[0] ?? null);
+  const handleFile = (e) => {
+    const selected = e.target.files[0] ?? null;
+    if (selected) {
+      const ext = `.${selected.name.split(".").pop().toLowerCase()}`;
+      const allowed = ALLOWED_EXTENSIONS.split(",");
+      if (!allowed.includes(ext)) {
+        setError(
+          `File type ${ext} is not allowed. Allowed: ${ALLOWED_EXTENSIONS}`,
+        );
+        e.target.value = "";
+        return;
+      }
+    }
+    setFile(selected);
+    setError("");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -402,11 +418,12 @@ function EvidenceForm({ incidentId, onSuccess, onCancel }) {
         >
           File{" "}
           <span className="text-gray-400 font-normal">
-            (optional — png, jpg, gif, txt, pdf)
+            (optional — png, jpg, jpeg, gif, txt, pdf)
           </span>
         </label>
         <input
           id="ev-file"
+          ref={fileInputRef}
           type="file"
           accept={ALLOWED_EXTENSIONS}
           onChange={handleFile}
@@ -424,7 +441,7 @@ function EvidenceForm({ incidentId, onSuccess, onCancel }) {
               type="button"
               onClick={() => {
                 setFile(null);
-                document.getElementById("ev-file").value = "";
+                if (fileInputRef.current) fileInputRef.current.value = "";
               }}
               className="text-gray-300 hover:text-red-400 transition-colors"
               aria-label="Remove file"
@@ -463,6 +480,7 @@ function EvidenceSection({ incidentId }) {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const deleteInFlight = useRef(false);
 
   const fetchEvidence = useCallback(
     (signal) => api.get(`/evidence/${incidentId}`, { signal }),
@@ -480,6 +498,8 @@ function EvidenceSection({ incidentId }) {
   };
 
   const handleDelete = async (id) => {
+    if (deleteInFlight.current) return;
+    deleteInFlight.current = true;
     setDeleting(true);
     setDeleteError("");
     try {
@@ -489,6 +509,7 @@ function EvidenceSection({ incidentId }) {
     } catch (err) {
       setDeleteError(getErrorMessage(err));
     } finally {
+      deleteInFlight.current = false;
       setDeleting(false);
     }
   };
