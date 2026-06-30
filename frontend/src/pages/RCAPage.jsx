@@ -9,6 +9,8 @@ export default function RCAPage() {
   const { id } = useParams();
   const [refreshKey, setRefreshKey] = useState(0);
   const inFlight = useRef(false);
+  // Tracks whether we've already populated the form from fetched data,
+  // so a re-fetch after save doesn't wipe unsaved edits mid-session.
   const hasPopulated = useRef(false);
 
   const fetchRca = useCallback(
@@ -106,6 +108,7 @@ export default function RCAPage() {
       setSuccessMsg(
         isEdit ? "RCA updated successfully." : "RCA created successfully.",
       );
+      // Allow re-population from the refreshed data after save
       hasPopulated.current = false;
       setRefreshKey((k) => k + 1);
     } catch (err) {
