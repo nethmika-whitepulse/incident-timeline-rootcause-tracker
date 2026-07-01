@@ -16,6 +16,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
+RUN mkdir -p uploads
 
 EXPOSE 5000
 CMD ["node", "dist/main"]

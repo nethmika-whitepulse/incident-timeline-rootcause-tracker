@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
 
   # ── Backend (NestJS) ──────────────────────────────────────────
@@ -7,11 +5,14 @@ services:
   # (the one you see in Compass at localhost:27017) — not a Docker
   # container. host.docker.internal is a special Docker DNS name
   # that resolves to your actual machine from inside a container.
+  # extra_hosts below is required for this to resolve on Linux —
+  # Docker Desktop (macOS/Windows) supports it natively.
   backend:
     build: ./backend
     container_name: incident-tracker-backend
     restart: unless-stopped
-    
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # needed on Linux; harmless on Mac/Windows
     environment:
       NODE_ENV:                production
       PORT:                    5000
@@ -24,6 +25,8 @@ services:
       LOG_LEVEL:               info
     ports:
       - "5000:5000"   # keeps PowerShell demo commands working
+    volumes:
+      - uploads_data:/app/uploads   # persists evidence file uploads across restarts/rebuilds
     networks:
       - incident-network
 
@@ -42,3 +45,6 @@ services:
 networks:
   incident-network:
     driver: bridge
+
+volumes:
+  uploads_data:
