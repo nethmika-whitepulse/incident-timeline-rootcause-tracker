@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+
+  # ── Backend (NestJS) ──────────────────────────────────────────
+  # Connects to the MongoDB already running on your host machine
+  # (the one you see in Compass at localhost:27017) — not a Docker
+  # container. host.docker.internal is a special Docker DNS name
+  # that resolves to your actual machine from inside a container.
+  backend:
+    build: ./backend
+    container_name: incident-tracker-backend
+    restart: unless-stopped
+    
+    environment:
+      NODE_ENV:                production
+      PORT:                    5000
+      MONGO_URI:               mongodb://host.docker.internal:27017/incident-tracker
+      JWT_SECRET:              ${JWT_SECRET}
+      JWT_REFRESH_SECRET:      ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN:          15m
+      JWT_REFRESH_EXPIRES_IN:  30d
+      CORS_ORIGIN:             http://localhost:3000
+      LOG_LEVEL:               info
+    ports:
+      - "5000:5000"   # keeps PowerShell demo commands working
+    networks:
+      - incident-network
+
+  # ── Frontend (React → nginx) ───────────────────────────────────
+  frontend:
+    build: ./frontend
+    container_name: incident-tracker-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - incident-network
+
+networks:
+  incident-network:
+    driver: bridge
