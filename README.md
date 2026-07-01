@@ -1,121 +1,180 @@
 # Incident Timeline & Root Cause Tracker
 
-A platform for engineering teams to document production incidents, build event timelines, collect evidence, perform root cause analysis (RCA), and track follow-up action items.
+A full-stack internal tool for engineering teams to document production incidents end-to-end — from the first alert, through a timestamped timeline and supporting evidence, to a formal root cause analysis and tracked follow-up action items.
+
+Built as an internship deliverable at Whitepulse Engineering.
+
+---
+
+## Features
+
+- **Authentication** — JWT access + refresh tokens, silent refresh on the frontend, protected routes
+- **Incident Management** — create, list, filter (by severity/status), and update incident status
+- **Timeline** — chronological event log per incident, with create/edit
+- **Evidence** — attach screenshots, logs, or notes to an incident, with optional file upload and delete
+- **Root Cause Analysis (RCA)** — dedicated page per incident to document root cause, resolution, lessons learned, and contributing factors
+- **Action Items** — track follow-up tasks per incident with owner, due date, and status
+- **Dashboard** — open incident count, incidents by severity, mean resolution time, recently closed incidents
 
 ---
 
 ## Tech Stack
 
-| Layer     | Technology                                      |
-|-----------|-------------------------------------------------|
-| Backend   | NestJS · TypeScript · MongoDB · Mongoose        |
-| Auth      | JWT · Passport · bcryptjs                       |
-| Uploads   | Multer (file evidence)                          |
-| Logging   | Winston via nest-winston                        |
-| API Docs  | Swagger (auto-generated at `/api/docs`)         |
-| Testing   | Jest · ts-jest · Supertest · @nestjs/testing    |
-| Frontend  | React · Vite · Tailwind CSS · Axios             |
+**Backend**
+- NestJS + TypeScript
+- MongoDB with Mongoose
+- Passport + JWT (access & refresh tokens)
+- Winston (logging), Joi (env validation)
+- Jest (unit tests)
+
+**Frontend**
+- React + Vite
+- Tailwind CSS
+- Axios (with silent token refresh)
+- React Router
+
+**Infrastructure**
+- Docker & Docker Compose
+- nginx (serves frontend build, proxies /api to backend)
 
 ---
 
 ## Project Structure
 
 ```
-incident-tracker/
-├── package.json               # Root monorepo scripts
+.
 ├── backend/
-│   ├── nest-cli.json
-│   ├── tsconfig.json
-│   ├── tsconfig.build.json
-│   ├── .env.example           # Copy to .env and fill in values
+│   ├── src/
+│   │   ├── auth/            # JWT auth, login, register, refresh
+│   │   ├── incidents/       # Core incident CRUD
+│   │   ├── timeline/        # Timeline events
+│   │   ├── evidence/        # Evidence upload/delete
+│   │   ├── rca/             # Root cause analysis
+│   │   ├── action-items/    # Follow-up action items
+│   │   ├── dashboard/       # Aggregated stats
+│   │   └── common/          # Global filters, interceptors
 │   ├── test/
-│   │   └── jest-e2e.json      # E2E test config
-│   └── src/
-│       ├── main.ts            # App bootstrap
-│       ├── app.module.ts      # Root module
-│       ├── auth/              # Register, login, JWT strategy
-│       ├── incidents/         # Incident CRUD + schemas
-│       ├── timeline/          # Timeline events
-│       ├── evidence/          # File uploads + notes
-│       ├── rca/               # Root cause analysis
-│       ├── action-items/      # Follow-up tasks
-│       ├── dashboard/         # Aggregated metrics
-│       └── common/
-│           ├── guards/        # JwtAuthGuard
-│           ├── filters/       # Global exception filter
-│           └── interceptors/  # Request logging interceptor
-└── frontend/
-    └── src/
-        ├── App.jsx
-        ├── api/axios.js       # Axios instance + interceptors
-        ├── context/           # AuthContext
-        ├── components/        # Layout, Badges, ProtectedRoute
-        ├── pages/             # Dashboard, Incidents, RCA, etc.
-        └── utils/helpers.js
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   ├── pages/           # Route-level components
+│   │   ├── components/      # Shared UI (Modal, badges, layout)
+│   │   ├── hooks/           # useApi, etc.
+│   │   ├── context/         # AuthContext
+│   │   ├── api/             # Axios instance
+│   │   └── utils/           # Helpers, constants
+│   ├── nginx.conf
+│   └── Dockerfile
+├── docker-compose.yml
+└── .env.example
 ```
 
 ---
 
 ## Getting Started
 
-### 1. Install dependencies
+### Option A — Run with Docker (recommended)
 
-```bash
-npm run install:all
-```
+**Prerequisites:** Docker Desktop, a running MongoDB instance (local or Atlas)
 
-### 2. Configure environment
+1. Copy the env template and fill in your secrets:
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env`:
+   ```
+   JWT_SECRET=your-long-random-string
+   JWT_REFRESH_SECRET=a-different-long-random-string
+   ```
 
-```bash
-cp backend/.env.example backend/.env
-# Fill in MONGO_URI and JWT_SECRET
-```
+2. By default, the backend container connects to a MongoDB instance running on your host machine at localhost:27017 (via host.docker.internal). Make sure your local MongoDB is running before starting Docker.
 
-### 3. Run in development
+   To use a different MongoDB (e.g. Atlas), edit the MONGO_URI value in docker-compose.yml under the backend service.
 
-```bash
-# Backend (http://localhost:5000)
-npm run dev:backend
+3. Build and start everything:
+   ```bash
+   docker-compose up --build
+   ```
 
-# Frontend (http://localhost:5173)
-npm run dev:frontend
-```
+4. Open the app:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000/api
+   - Swagger docs (dev only): http://localhost:5000/api/docs
 
-### 4. API Documentation
+5. Stop everything:
+   ```bash
+   docker-compose down
+   ```
 
-Swagger UI is available at `http://localhost:5000/api/docs` when `NODE_ENV=development`.
+### Option B — Run locally without Docker
 
-### 5. Run tests
+**Prerequisites:** Node.js 20+, MongoDB running locally or an Atlas connection string
 
-```bash
-npm run test:backend    # 27 unit tests
-```
+1. Install dependencies for both apps:
+   ```bash
+   npm run install:all
+   ```
+
+2. Create backend/.env:
+   ```
+   NODE_ENV=development
+   PORT=5000
+   MONGO_URI=mongodb://localhost:27017/incident-tracker
+   JWT_SECRET=your-long-random-string
+   JWT_REFRESH_SECRET=a-different-long-random-string
+   JWT_EXPIRES_IN=15m
+   JWT_REFRESH_EXPIRES_IN=30d
+   CORS_ORIGIN=http://localhost:5173
+   ```
+
+3. Start the backend:
+   ```bash
+   npm run dev:backend
+   ```
+
+4. In a second terminal, start the frontend:
+   ```bash
+   npm run dev:frontend
+   ```
+
+5. Open http://localhost:5173
 
 ---
 
-## API Endpoints
+## Running Tests
 
-| Method | Route                        | Description                  | Auth |
-|--------|------------------------------|------------------------------|------|
-| POST   | /api/auth/register           | Register a new user          | No   |
-| POST   | /api/auth/login              | Login, receive JWT           | No   |
-| GET    | /api/incidents               | List all incidents           | Yes  |
-| POST   | /api/incidents               | Create incident              | Yes  |
-| GET    | /api/incidents/:id           | Get single incident          | Yes  |
-| PATCH  | /api/incidents/:id           | Update incident              | Yes  |
-| DELETE | /api/incidents/:id           | Delete incident              | Yes  |
-| POST   | /api/timeline                | Add timeline event           | Yes  |
-| GET    | /api/timeline/:incidentId    | Get events (chronological)   | Yes  |
-| PATCH  | /api/timeline/:id            | Update timeline event        | Yes  |
-| DELETE | /api/timeline/:id            | Delete timeline event        | Yes  |
-| POST   | /api/evidence                | Upload evidence / add note   | Yes  |
-| GET    | /api/evidence/:incidentId    | List evidence for incident   | Yes  |
-| DELETE | /api/evidence/:id            | Delete evidence              | Yes  |
-| POST   | /api/rca                     | Create RCA document          | Yes  |
-| GET    | /api/rca/:incidentId         | Get RCA for incident         | Yes  |
-| PATCH  | /api/rca/:incidentId         | Update RCA                   | Yes  |
-| POST   | /api/action-items            | Create action item           | Yes  |
-| GET    | /api/action-items/:incidentId| List action items            | Yes  |
-| PATCH  | /api/action-items/:id        | Update action item           | Yes  |
-| DELETE | /api/action-items/:id        | Delete action item           | Yes  |
-| GET    | /api/dashboard               | Get dashboard summary        | Yes  |
+```bash
+npm run test:backend
+```
+
+77 unit tests across 14 suites covering auth, incidents, timeline, evidence, RCA, action items, and dashboard.
+
+---
+
+## API Overview
+
+All routes are prefixed with /api and (except auth) require a Bearer token.
+
+| Resource | Endpoints |
+|---|---|
+| Auth | POST /auth/register, POST /auth/login, POST /auth/refresh |
+| Incidents | GET/POST /incidents, GET/PATCH /incidents/:id |
+| Timeline | GET /timeline/:incidentId, POST /timeline, PATCH /timeline/:id |
+| Evidence | GET /evidence/:incidentId, POST /evidence (multipart), DELETE /evidence/:id |
+| RCA | GET /rca/:incidentId, POST /rca, PATCH /rca/:incidentId |
+| Action Items | GET /action-items/:incidentId, POST /action-items, PATCH /action-items/:id |
+| Dashboard | GET /dashboard |
+
+> Note: POST endpoints for Timeline, RCA, and Action Items expect incidentId in the request body, not the URL.
+
+Full interactive documentation is available via Swagger at /api/docs when running in development mode.
+
+---
+
+## Notes on Design Decisions
+
+- RCA and Action Items are separate pages (/incidents/:id/rca, /incidents/:id/actions), while Timeline and Evidence are inline modals within the Incident Detail view — this reflects their relative complexity.
+- Evidence supports create and delete only — there is no edit/update endpoint by design.
+- Mongoose validation errors and MongoDB duplicate key errors are caught globally and returned as proper 400/409 responses instead of generic 500s.
+
+---
